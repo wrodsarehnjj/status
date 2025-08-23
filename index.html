@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CC‑MP</title>
   <meta name="color-scheme" content="dark light" />
+  <!-- Single place to flip status for external checkers -->
+  <meta name="ccmp-status" content="Up" />
   <style>
     :root{
       --bg: radial-gradient(1200px 800px at 10% 10%, #1c2536, #0f172a 40%, #0b1020 60%);
@@ -114,22 +116,26 @@
           <h3>What CC‑MP is not</h3>
           <ul class="list">
             <li>Not official or endorsed by DashNet/Orteil.</li>
-            <li>Not guaranteed to be available 24/7.</li>
+            <li>Not guaranteed to be available 24/7; servers may go up/down.</li>
             <li>Not a paid product; avoid anyone selling “access”.</li>
             <li>Not a promise of fairness on public servers—admins may enforce their own rules.</li>
           </ul>
         </div>
         <div class="card">
           <h3>Notes</h3>
-          <p>Always use trusted sources for mods. Keep saves of your Cookie Clicker save. Follow the rules of whichever server you join.</p>
+          <p>Always use trusted sources for mods. Keep backups of your Cookie Clicker save. Follow the rules of whichever server you join.</p>
         </div>
       </div>
     </section>
   </div>
 
   <script>
-    const CCMP_STATUS = 'down';
+    // === SINGLE LINE TO EDIT (no UI hints) ==================================
+    // Set this to the same value as the <meta name="ccmp-status" content="Up|Down">
+    const CCMP_STATUS = (document.querySelector('meta[name="ccmp-status"]').getAttribute('content') || 'Up');
+    // =========================================================================
 
+    // Status apply
     const dot = document.getElementById('dot');
     const text = document.getElementById('statusText');
     function apply(state){
