@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CC‑MP</title>
   <meta name="color-scheme" content="dark light" />
-  <!-- Single place to flip status for external checkers -->
-  <meta name="ccmp-status" content="Up" />
+  <!-- Single switch: set to Up or Down -->
+  <meta name="ccmp-status" content="Down" />
   <style>
     :root{
       --bg: radial-gradient(1200px 800px at 10% 10%, #1c2536, #0f172a 40%, #0b1020 60%);
@@ -48,10 +48,8 @@
     .hero .muted{ color:var(--muted); font-size:.95rem; margin-top:2px }
 
     /* Tabs */
-    .tabs{
-      display:flex; gap:8px; position:relative; padding:8px; border-radius:14px; background: var(--card);
-      border:1px solid var(--card-border); box-shadow: var(--shadow);
-    }
+    .tabs{ display:flex; gap:8px; position:relative; padding:8px; border-radius:14px; background: var(--card);
+      border:1px solid var(--card-border); box-shadow: var(--shadow); }
     .tab{ appearance:none; background:transparent; color:var(--txt); border:0; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; position:relative; }
     .tab[aria-selected="true"]{ background: rgba(255,255,255,.08); }
 
@@ -93,11 +91,11 @@
       <button class="tab" role="tab" aria-selected="false" aria-controls="panel-info" id="tab-info">Info</button>
     </nav>
 
-    <!-- STATUS PANEL -->
+    <!-- STATUS PANEL (initial markup mirrors meta to help external checkers) -->
     <section class="panel" role="tabpanel" id="panel-status" aria-labelledby="tab-status">
       <div class="row">
-        <div id="dot" class="dot" aria-hidden="true"></div>
-        <div id="statusText" class="status">—</div>
+        <div id="dot" class="dot down" aria-hidden="true"></div>
+        <div id="statusText" class="status">Down</div>
       </div>
     </section>
 
@@ -106,49 +104,50 @@
       <div class="grid">
         <div class="card">
           <h3>What is CC‑MP?</h3>
-          <p>CC‑MP is a community‑made project that brings multiplayer experiences to Cookie Clicker. Depending on the server, it can include rooms, shared progress, presence, and chat.</p>
+          <p>CC‑MP is a community‑made project that brings multiplayer‑style features to Cookie Clicker. Depending on the server, it can include rooms, shared progress, presence, and chat.</p>
         </div>
         <div class="card">
-          <h3>How it works (high level)</h3>
-          <p>A client‑side mod connects to a CC‑MP server to exchange gameplay events (like clicks or session info) with other players in the same room. Exact features vary by server.</p>
+          <h3>How it works</h3>
+          <p>A client‑side mod connects to a CC‑MP server to exchange events with other players. Feature sets vary by server.</p>
         </div>
         <div class="card">
           <h3>What CC‑MP is not</h3>
           <ul class="list">
             <li>Not official or endorsed by DashNet/Orteil.</li>
-            <li>Not guaranteed to be available 24/7; servers may go up/down.</li>
-            <li>Not a paid product; avoid anyone selling “access”.</li>
-            <li>Not a promise of fairness on public servers—admins may enforce their own rules.</li>
+            <li>Not guaranteed 24/7; servers may go up/down.</li>
+            <li>Not a paid product; avoid anyone selling access.</li>
           </ul>
         </div>
         <div class="card">
           <h3>Notes</h3>
-          <p>Always use trusted sources for mods. Keep backups of your Cookie Clicker save. Follow the rules of whichever server you join.</p>
+          <p>Use trusted sources, back up your save, and follow each server’s rules.</p>
         </div>
       </div>
     </section>
   </div>
 
   <script>
-    // === SINGLE LINE TO EDIT (no UI hints) ==================================
-    // Set this to the same value as the <meta name="ccmp-status" content="Up|Down">
-    const CCMP_STATUS = (document.querySelector('meta[name="ccmp-status"]').getAttribute('content') || 'Down');
-    // =========================================================================
+    // Read single source of truth from <meta name="ccmp-status" content="Up|Down">
+    function getMetaStatus(){
+      const meta = document.querySelector('meta[name="ccmp-status"]');
+      const v = (meta?.getAttribute('content') || 'Down').trim().toLowerCase();
+      return v === 'up' ? 'up' : 'down';
+    }
 
-    // Status apply
-    const dot = document.getElementById('dot');
-    const text = document.getElementById('statusText');
     function apply(state){
-      const s = String(state||'').toLowerCase();
-      const isUp = s === 'up';
+      const isUp = String(state).toLowerCase() === 'up';
+      const dot = document.getElementById('dot');
+      const text = document.getElementById('statusText');
       dot.className = 'dot ' + (isUp ? 'up' : 'down');
       text.textContent = isUp ? 'Up' : 'Down';
       document.title = `CC‑MP • ${isUp ? 'Up' : 'Down'}`;
     }
-    apply(CCMP_STATUS);
-    window.setCCMPStatus = apply; // optional external toggle
 
-    // Tabs logic
+    // Initialize from meta and keep optional external toggle
+    document.addEventListener('DOMContentLoaded', () => apply(getMetaStatus()));
+    window.setCCMPStatus = apply; // optional dynamic toggle (not required)
+
+    // Tabs
     const tabs = Array.from(document.querySelectorAll('.tab'));
     const panels = {
       'tab-status': document.getElementById('panel-status'),
@@ -162,7 +161,6 @@
       }
     }
     tabs.forEach(t => t.addEventListener('click', () => activate(t.id)));
-    // keyboard: left/right switch
     document.querySelector('.tabs').addEventListener('keydown', (e) => {
       if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
       e.preventDefault();
